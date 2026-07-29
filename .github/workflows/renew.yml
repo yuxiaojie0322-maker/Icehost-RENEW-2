@@ -39,3 +39,7 @@ jobs:
           name: icehost-debug-screenshot
           path: icehost_debug_screenshot.png
           if-no-files-found: ignore
+          retention-days: 1 # 🟢 加上此行：只保留 1 天，过期自动删，避免占用空间
+
+      # 🟢 如果后续依然报容量已满，可以直接把上面【Upload Debug Screenshot】整段删除，
+      # 或者在下面将它们注释掉（在行首加 #）。
