@@ -36,12 +36,3 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
         run: python icehost_run.py
-
-      - name: Upload Debug Screenshot
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: icehost-debug-screenshot
-          path: icehost_debug_screenshot.png
-          if-no-files-found: ignore
-          retention-days: 1 # 设置上传的图片产物仅保留 1 天
