@@ -2,8 +2,13 @@ name: IceHost Hourly KeepAlive
 
 on:
   schedule:
-    - cron: '0 */5 * * *'  # 🟢 开启自动触发：每 5 小时自动执行一次
-  workflow_dispatch:       # 🟢 保留手动触发：允许你在网页上随时点击运行
+    - cron: '0 */5 * * *'  # 每 5 小时自动执行一次
+  workflow_dispatch:       # 支持手动触发
+
+# 自动清理/并发控制：如果有新任务触发，取消上一期尚未结束的旧任务
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check-and-start:
@@ -39,7 +44,4 @@ jobs:
           name: icehost-debug-screenshot
           path: icehost_debug_screenshot.png
           if-no-files-found: ignore
-          retention-days: 1 # 🟢 加上此行：只保留 1 天，过期自动删，避免占用空间
-
-      # 🟢 如果后续依然报容量已满，可以直接把上面【Upload Debug Screenshot】整段删除，
-      # 或者在下面将它们注释掉（在行首加 #）。
+          retention-days: 1 # 设置上传的图片产物仅保留 1 天
