@@ -11,7 +11,7 @@ ICEHOST_COOKIES = os.getenv("ICEHOST_COOKIES")
 
 
 def send_tg_notification(message, photo_path=None):
-    """发送结果和截图至 Telegram"""
+    """发送结果和截图至 Telegram，并在发送后清理本地截图文件"""
     token = os.getenv("TG_BOT_TOKEN")
     chat_id = os.getenv("TG_CHAT_ID")
     if not token or not chat_id:
@@ -31,7 +31,7 @@ def send_tg_notification(message, photo_path=None):
     except Exception as e:
         print(f"发送 TG 消息异常: {e}")
 
-    # 2. 发送截图文件
+    # 2. 发送截图文件并自动清理
     if photo_path and os.path.exists(photo_path):
         try:
             url = f"https://api.telegram.org/bot{token}/sendPhoto"
@@ -42,6 +42,14 @@ def send_tg_notification(message, photo_path=None):
             print("TG 截图发送成功。")
         except Exception as e:
             print(f"发送 TG 截图异常: {e}")
+        finally:
+            # 推送完毕后删除本地截图文件，保持环境整洁
+            try:
+                if os.path.exists(photo_path):
+                    os.remove(photo_path)
+                    print(f"临时截图文件 {photo_path} 已自动清理。")
+            except Exception as e:
+                print(f"清理临时截图文件失败: {e}")
 
 
 def run():
