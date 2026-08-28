@@ -5,6 +5,11 @@ on:
     - cron: '0 */5 * * *'  # 每 5 小时自动执行一次
   workflow_dispatch:       # 支持手动触发
 
+# 赋予 Actions 删除工作流历史运行记录的权限
+permissions:
+  actions: write
+  contents: read
+
 # 自动清理/并发控制：如果有新任务触发，取消上一期尚未结束的旧任务
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,3 +41,12 @@ jobs:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
         run: python icehost_run.py
+
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        if: always() # 无论脚本运行成功还是失败，都执行清理
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 1 # 只保留最后 1 次运行记录
