@@ -2,7 +2,7 @@ name: IceHost Hourly KeepAlive
 
 on:
   schedule:
-    - cron: '0 */5 * * *'  # 每 5 小时自动执行一次
+    - cron: '0 */1 * * *'  # 每 5 小时自动执行一次
   workflow_dispatch:       # 支持手动触发
 
 # 赋予 Actions 删除工作流历史运行记录的权限
