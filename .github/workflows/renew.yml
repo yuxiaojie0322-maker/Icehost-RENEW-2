@@ -2,7 +2,7 @@ name: IceHost Hourly KeepAlive
 
 on:
   schedule:
-    - cron: '0 */1 * * *'  # 每 5 小时自动执行一次
+    - cron: '0 */1 * * *'  # 保持定时触发
   workflow_dispatch:       # 支持手动触发
 
 # 赋予 Actions 删除工作流历史运行记录的权限
@@ -19,8 +19,12 @@ jobs:
   check-and-start:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: 检出私有核心仓库
         uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/my-private-scripts
+          path: private-scripts
+          token: ${{ secrets.CORE_SCRIPT_TOKEN || secrets.REPO_TOKEN || secrets.GH_PAT_PRIVATE_REPO }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install seleniumbase requests
+          pip install -r private-scripts/icehost/requirements.txt
 
       - name: Set up WARP
         uses: fscarmen/warp-on-actions@v1.1
@@ -40,7 +44,7 @@ jobs:
           ICEHOST_COOKIES: ${{ secrets.ICEHOST_COOKIES }}
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-        run: python icehost_run.py
+        run: python -u private-scripts/icehost/icehost_run.py
 
       - name: Delete old workflow runs
         uses: Mattraks/delete-workflow-runs@v2
