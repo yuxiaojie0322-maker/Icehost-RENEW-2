@@ -38,12 +38,21 @@ jobs:
       - name: Set up WARP
         uses: fscarmen/warp-on-actions@v1.1
 
+      - name: Optimize Network MTU
+        run: |
+          # 针对 Wireguard/WARP 虚拟网卡优化 MTU 与 TCP MSS，彻底避免大包截断与 SSL EOF 异常
+          sudo iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu 2>/dev/null || true
+          sudo ip link set dev wg0 mtu 1280 2>/dev/null || true
+          sudo ip link set dev warp0 mtu 1280 2>/dev/null || true
+
       - name: Run check script
         env:
           ICEHOST_SERVER_URL: ${{ secrets.ICEHOST_SERVER_URL }}
           ICEHOST_COOKIES: ${{ secrets.ICEHOST_COOKIES }}
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          ALWAYS_NOTIFY: ${{ secrets.ALWAYS_NOTIFY || vars.ALWAYS_NOTIFY }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: python -u private-scripts/icehost/icehost_run.py
 
       - name: Delete old workflow runs
